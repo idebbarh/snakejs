@@ -1,0 +1,25 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+#grid {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+#grid .row-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#grid .cell {
+  width: 20px;
+  height: 20px;
+  border: 1px solid black;
+}
+#grid .beat-cell {
+  background: green;
+}
+#grid .snake-cell {
+  background: red;
+}
