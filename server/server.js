@@ -18,6 +18,10 @@ app.get("/index.js", async (_, res) => {
   res.sendFile(getFilePath("../index.js"));
 });
 
+app.get("/snake.js", async (_, res) => {
+  res.sendFile(getFilePath("../snake.js"));
+});
+
 app.get("/style.css", async (_, res) => {
   res.sendFile(getFilePath("../style.css"));
 });

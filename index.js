@@ -1,11 +1,16 @@
+import Snake from "./snake.js";
+
 const COLS = 100;
 const ROWS = 40;
 let snakePos = [Math.floor(COLS / 2), Math.floor(ROWS / 2)];
+const snakeBody = new Snake(snakePos);
+
 let beatPos = getBeatPosition();
 const DIRS = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
 
 function isSnakeOutOfGrid(dir) {
   let res = false;
+  let snakePos = snakeBody.tail.value;
   switch (dir) {
     case "ArrowUp":
       if (snakePos[1] === 0) {
@@ -35,45 +40,41 @@ function isSnakeOutOfGrid(dir) {
 
 function moveSnake(dir) {
   const isSnakeOut = isSnakeOutOfGrid(dir);
-
+  let snakePos = snakeBody.tail.value;
   switch (dir) {
     case "ArrowUp":
-      if (isSnakeOut) {
-        snakePos = [snakePos[0], ROWS - 1];
-      } else {
-        snakePos = [snakePos[0], snakePos[1] - 1];
-      }
+      snakeBody.moveSnake([
+        snakePos[0],
+        isSnakeOut ? ROWS - 1 : snakePos[1] - 1,
+      ]);
       break;
     case "ArrowDown":
-      if (isSnakeOut) {
-        snakePos = [snakePos[0], 0];
-      } else {
-        snakePos = [snakePos[0], snakePos[1] + 1];
-      }
+      snakeBody.moveSnake([snakePos[0], isSnakeOut ? 0 : snakePos[1] + 1]);
       break;
     case "ArrowLeft":
-      if (isSnakeOut) {
-        snakePos = [COLS - 1, snakePos[1]];
-      } else {
-        snakePos = [snakePos[0] - 1, snakePos[1]];
-      }
+      snakeBody.moveSnake([
+        isSnakeOut ? COLS - 1 : snakePos[0] - 1,
+        snakePos[1],
+      ]);
       break;
     case "ArrowRight":
-      if (isSnakeOut) {
-        snakePos = [0, snakePos[1]];
-      } else {
-        snakePos = [snakePos[0] + 1, snakePos[1]];
-      }
+      snakeBody.moveSnake([isSnakeOut ? 0 : snakePos[0] + 1, snakePos[1]]);
       break;
     default:
       throw Error(`ERROR: could not know direction of ${dir}`);
+  }
+
+  let cur = snakeBody.head;
+  while (cur) {
+    console.log(cur.value);
+    cur = cur.next;
   }
 }
 
 function getBeatPosition() {
   let col = Math.floor(Math.random() * COLS);
   let row = Math.floor(Math.random() * ROWS);
-  if (col === snakePos[0] && row == snakePos[1]) {
+  if (isSnakeCell([col, row])) {
     if (col < COLS - 1) {
       return [col + 1, row];
     } else if (col > 0) {
@@ -85,13 +86,27 @@ function getBeatPosition() {
 
 function checkIfBeatEaten() {
   const [beatCol, beatRow] = beatPos;
-  const [snakeCol, snakeRow] = snakePos;
+  const [snakeCol, snakeRow] = snakeBody.tail.value;
 
   if (beatCol !== snakeCol || beatRow !== snakeRow) {
     return;
   }
 
   beatPos = getBeatPosition();
+  snakeBody.unshift();
+}
+
+function isSnakeCell(pos) {
+  let [posCol, posRow] = pos;
+  let cur = snakeBody.head;
+
+  while (cur) {
+    if (cur.value[0] === posCol && cur.value[1] === posRow) {
+      return true;
+    }
+    cur = cur.next;
+  }
+  return false;
 }
 
 function keyPressHandler(e) {
@@ -106,7 +121,6 @@ function keyPressHandler(e) {
 
 function renderGrid() {
   const [beatCol, beatRow] = beatPos;
-  const [snakeCol, snakeRow] = snakePos;
 
   const gridContainer = document.createElement("div");
   gridContainer.id = "grid";
@@ -120,7 +134,7 @@ function renderGrid() {
       if (i === beatRow && j == beatCol) {
         cell.classList.add("beat-cell");
       }
-      if (i === snakeRow && j == snakeCol) {
+      if (isSnakeCell([j, i])) {
         cell.classList.add("snake-cell");
       }
 
