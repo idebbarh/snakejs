@@ -1,3 +1,10 @@
+:root {
+  --grid-bg: #3d3d3d;
+  --cell-dot-bg: #1f1f1f;
+  --cell-beat-bg: #fdfdfd;
+  --snake-body-bg: #2b796c;
+  --snake-head-bg: #4fad9d;
+}
 * {
   padding: 0;
   margin: 0;
@@ -6,20 +13,33 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
+  background: var(--grid-bg);
+  padding: 10px;
 }
-#grid .row-container {
+.grid__row {
   display: flex;
   align-items: center;
   justify-content: center;
 }
-#grid .cell {
+.row__cell {
   width: 20px;
   height: 20px;
-  border: 1px solid black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
-#grid .beat-cell {
-  background: green;
+.row__cell--snake-body-cell {
+  background: var(--snake-body-bg);
 }
-#grid .snake-cell {
-  background: red;
+.row__cell--snake-head-cell {
+  background: var(--snake-head-bg);
+}
+.cell__dot {
+  width: 10px;
+  height: 10px;
+  background: var(--cell-dot-bg);
+  border-radius: 50%;
+}
+.row__cell--beat-cell .cell__dot {
+  background: var(--cell-beat-bg);
 }

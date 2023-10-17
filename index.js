@@ -97,16 +97,18 @@ function checkIfBeatEaten() {
 }
 
 function isSnakeCell(pos) {
-  let [posCol, posRow] = pos;
+  const [posCol, posRow] = pos;
+  const isSnakeHead =
+    posCol === snakeBody.tail.value[0] && snakeBody.tail.value[1] === posRow;
   let cur = snakeBody.head;
 
   while (cur) {
     if (cur.value[0] === posCol && cur.value[1] === posRow) {
-      return true;
+      return [true, isSnakeHead];
     }
     cur = cur.next;
   }
-  return false;
+  return [false, isSnakeHead];
 }
 
 function keyPressHandler(e) {
@@ -127,17 +129,26 @@ function renderGrid() {
 
   for (let i = 0; i < ROWS; ++i) {
     const rowContainer = document.createElement("div");
-    rowContainer.className = "row-container";
+    rowContainer.className = "grid__row";
     for (let j = 0; j < COLS; ++j) {
-      const cell = document.createElement("span");
-      cell.className = "cell";
+      const [_isSnakeCell, isSnakeHead] = isSnakeCell([j, i]);
+      const cell = document.createElement("div");
+      cell.className = "row__cell";
+      cell.setAttribute("cell-pos", `${j},${i}`);
       if (i === beatRow && j == beatCol) {
-        cell.classList.add("beat-cell");
+        cell.classList.add("row__cell--beat-cell");
+      } else if (_isSnakeCell) {
+        if (isSnakeHead) {
+          cell.classList.add("row__cell--snake-head-cell");
+        } else {
+          cell.classList.add("row__cell--snake-body-cell");
+        }
       }
-      if (isSnakeCell([j, i])) {
-        cell.classList.add("snake-cell");
+      if (!_isSnakeCell) {
+        const cellDot = document.createElement("span");
+        cellDot.className = "cell__dot";
+        cell.appendChild(cellDot);
       }
-
       rowContainer.appendChild(cell);
     }
     gridContainer.appendChild(rowContainer);
