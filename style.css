@@ -1,4 +1,5 @@
 :root {
+  --body-bg: #242424;
   --grid-bg: #3d3d3d;
   --cell-dot-bg: #1f1f1f;
   --cell-beat-bg: #fdfdfd;
@@ -9,12 +10,35 @@
   padding: 0;
   margin: 0;
 }
+body {
+  background: var(--body-bg);
+}
+#record-pannel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.2rem;
+  margin: 15px auto;
+  padding: 0 10px;
+  background: var(--snake-head-bg);
+  border-radius: 0.8rem;
+  min-height: 80px;
+}
+.record-pannel__title {
+  color: white;
+  font-weight: bold;
+  font-size: 1.8rem;
+}
+.record-pannel__title .title__value {
+  font-size: 2.4rem;
+}
 #grid {
-  height: 100vh;
   display: flex;
   flex-direction: column;
   background: var(--grid-bg);
   padding: 10px;
+  border-radius: 0.8rem;
+  margin: 0 auto;
 }
 .grid__row {
   display: flex;

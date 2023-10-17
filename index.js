@@ -1,12 +1,15 @@
 import Snake from "./snake.js";
 
-const COLS = 100;
-const ROWS = 40;
+const COLS = 50;
+const ROWS = 30;
+let speed = 0;
+let score = 0;
 let snakePos = [Math.floor(COLS / 2), Math.floor(ROWS / 2)];
 const snakeBody = new Snake(snakePos);
-
 let beatPos = getBeatPosition();
 const DIRS = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+const recordPannedContainer = document.getElementById("record-pannel");
+recordPannedContainer.style.width = `${COLS * 20}px`;
 
 function isSnakeOutOfGrid(dir) {
   let res = false;
@@ -92,6 +95,8 @@ function checkIfBeatEaten() {
     return;
   }
 
+  score++;
+  updateGameScore();
   beatPos = getBeatPosition();
   snakeBody.unshift();
 }
@@ -175,6 +180,12 @@ function updateGrid() {
   updateGridBeatCell();
   updateGridSnakeCells();
 }
+function updateGameScore() {
+  const scoreValueContainer = document.querySelector(
+    ".record-pannel__title .title__value--speed",
+  );
+  scoreValueContainer.innerText = score;
+}
 
 function keyPressHandler(e) {
   const dir = e.key;
@@ -219,6 +230,8 @@ function renderGrid() {
     }
     gridContainer.appendChild(rowContainer);
   }
+  gridContainer.style.width = `${COLS * 20}px`;
+  gridContainer.style.height = `${ROWS * 20}px`;
   document.body.appendChild(gridContainer);
 }
 
