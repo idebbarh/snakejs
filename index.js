@@ -2,19 +2,30 @@ import Snake from "./snake.js";
 
 const COLS = 50;
 const ROWS = 30;
-let speed = 0;
-let score = 0;
+const DIRS = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+const recordPannedContainer = document.getElementById("record-pannel");
+const speedValueContainer = document.querySelector(
+  ".record-pannel__title .title__value--speed",
+);
+const X_INC_SPEED = 10;
+const SNAKE_MAX_SPEED = 30;
+const SNAKE_START_SPEED = 200;
+
 let snakePos = [Math.floor(COLS / 2), Math.floor(ROWS / 2)];
 const snakeBody = new Snake(snakePos);
 let beatPos = getBeatPosition();
-const DIRS = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
-const recordPannedContainer = document.getElementById("record-pannel");
-recordPannedContainer.style.width = `${COLS * 20}px`;
+let currentSnakeDirection = DIRS[Math.floor(Math.random() * DIRS.length)];
+let snakeMovementSpeed = SNAKE_START_SPEED;
+let score = 0;
+let infervalId = null;
 
-function isSnakeOutOfGrid(dir) {
+recordPannedContainer.style.width = `${COLS * 20}px`;
+speedValueContainer.innerText = SNAKE_START_SPEED - snakeMovementSpeed + 10;
+
+function isSnakeOutOfGrid() {
   let res = false;
   let snakePos = snakeBody.tail.value;
-  switch (dir) {
+  switch (currentSnakeDirection) {
     case "ArrowUp":
       if (snakePos[1] === 0) {
         res = true;
@@ -36,15 +47,17 @@ function isSnakeOutOfGrid(dir) {
       }
       break;
     default:
-      throw Error(`ERROR: could not know direction of ${dir}`);
+      throw Error(
+        `ERROR: could not know direction of ${currentSnakeDirection}`,
+      );
   }
   return res;
 }
 
-function moveSnake(dir) {
-  const isSnakeOut = isSnakeOutOfGrid(dir);
+function moveSnake() {
+  const isSnakeOut = isSnakeOutOfGrid();
   let snakePos = snakeBody.tail.value;
-  switch (dir) {
+  switch (currentSnakeDirection) {
     case "ArrowUp":
       snakeBody.moveSnake([
         snakePos[0],
@@ -64,26 +77,28 @@ function moveSnake(dir) {
       snakeBody.moveSnake([isSnakeOut ? 0 : snakePos[0] + 1, snakePos[1]]);
       break;
     default:
-      throw Error(`ERROR: could not know direction of ${dir}`);
-  }
-
-  let cur = snakeBody.head;
-  while (cur) {
-    console.log(cur.value);
-    cur = cur.next;
+      throw Error(
+        `ERROR: could not know direction of ${currentSnakeDirection}`,
+      );
   }
 }
 
 function getBeatPosition() {
-  let col = Math.floor(Math.random() * COLS);
-  let row = Math.floor(Math.random() * ROWS);
-  if (isSnakeCell([col, row])) {
-    if (col < COLS - 1) {
-      return [col + 1, row];
-    } else if (col > 0) {
-      return [col - 1, row];
-    }
+  const emptyCells = document.querySelectorAll(
+    ".row__cell:not(.row__cell--snake-body-cell, .row__cell--snake-head-cell, .row__cell--beat-cell)",
+  );
+
+  if (!emptyCells.length) {
+    return [Math.floor(Math.random() * COLS), Math.floor(Math.random() * ROWS)];
   }
+
+  const randomIndex = Math.floor(Math.random() * emptyCells.length);
+  const randomCell = emptyCells[randomIndex];
+  const [col, row] = randomCell
+    .getAttribute("cell-pos")
+    .split(",")
+    .map((n) => parseInt(n));
+
   return [col, row];
 }
 
@@ -94,11 +109,11 @@ function checkIfBeatEaten() {
   if (beatCol !== snakeCol || beatRow !== snakeRow) {
     return;
   }
-
-  score++;
   updateGameScore();
+  updateSnakeSpeed();
   beatPos = getBeatPosition();
   snakeBody.unshift();
+  setSnakeMovementInterval();
 }
 
 function isSnakeCell(pos) {
@@ -119,9 +134,10 @@ function isSnakeCell(pos) {
 function resetSnakeCell(cell) {
   const cellDot = document.createElement("span");
   cellDot.className = "cell__dot";
-  cell.appendChild(cellDot);
   cell.classList.remove("row__cell--snake-body-cell");
   cell.classList.remove("row__cell--snake-head-cell");
+  cell.innerHtml = "";
+  cell.appendChild(cellDot);
 }
 
 function changeCellToSnakeCell(cur, isHead = false) {
@@ -180,19 +196,38 @@ function updateGrid() {
   updateGridBeatCell();
   updateGridSnakeCells();
 }
+
 function updateGameScore() {
+  score++;
   const scoreValueContainer = document.querySelector(
-    ".record-pannel__title .title__value--speed",
+    ".record-pannel__title .title__value--score",
   );
   scoreValueContainer.innerText = score;
 }
 
-function keyPressHandler(e) {
-  const dir = e.key;
-  if (!DIRS.includes(dir)) {
+function updateSnakeSpeed() {
+  snakeMovementSpeed = Math.max(
+    SNAKE_MAX_SPEED,
+    snakeMovementSpeed - X_INC_SPEED,
+  );
+  if (snakeMovementSpeed === SNAKE_MAX_SPEED) {
+    speedValueContainer.classList.add("title__value--max");
+    speedValueContainer.innerText = "Max speed";
     return;
   }
-  moveSnake(dir);
+  speedValueContainer.innerText = SNAKE_START_SPEED - snakeMovementSpeed + 10;
+}
+
+function keyPressHandler(e) {
+  const dir = e.key;
+  if (!DIRS.includes(dir) || dir === currentSnakeDirection) {
+    return;
+  }
+  currentSnakeDirection = dir;
+}
+
+function snakeAutoMoveHanlder() {
+  moveSnake();
   checkIfBeatEaten();
   updateGrid();
 }
@@ -235,6 +270,15 @@ function renderGrid() {
   document.body.appendChild(gridContainer);
 }
 
+function setSnakeMovementInterval() {
+  if (infervalId !== null) {
+    clearInterval(infervalId);
+  }
+  snakeAutoMoveHanlder();
+  infervalId = setInterval(snakeAutoMoveHanlder, snakeMovementSpeed);
+}
+
 document.addEventListener("keydown", keyPressHandler);
 
 renderGrid(snakePos);
+setSnakeMovementInterval();

@@ -32,6 +32,9 @@ body {
 .record-pannel__title .title__value {
   font-size: 2.4rem;
 }
+.record-pannel__title .title__value--max {
+  color: #d2122e;
+}
 #grid {
   display: flex;
   flex-direction: column;
