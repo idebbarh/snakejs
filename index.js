@@ -132,12 +132,16 @@ function isSnakeCell(pos) {
 }
 
 function resetSnakeCell(cell) {
-  const cellDot = document.createElement("span");
-  cellDot.className = "cell__dot";
+  const newCellDot = document.createElement("span");
+  const currCellDot = cell.querySelector(".cell__dot");
+  //i think this will never be true
+  if (currCellDot) {
+    currCellDot.remove();
+  }
+  newCellDot.className = "cell__dot";
   cell.classList.remove("row__cell--snake-body-cell");
   cell.classList.remove("row__cell--snake-head-cell");
-  cell.innerHtml = "";
-  cell.appendChild(cellDot);
+  cell.appendChild(newCellDot);
 }
 
 function changeCellToSnakeCell(cur, isHead = false) {
@@ -152,8 +156,10 @@ function changeCellToSnakeCell(cur, isHead = false) {
   }
 
   if (isHead) {
+    newBodyCell.classList.remove("row__cell--snake-body-cell");
     newBodyCell.classList.add("row__cell--snake-head-cell");
   } else {
+    newBodyCell.classList.remove("row__cell--snake-head-cell");
     newBodyCell.classList.add("row__cell--snake-body-cell");
   }
 }
