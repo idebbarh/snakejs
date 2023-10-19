@@ -2,7 +2,14 @@ import Snake from "./snake.js";
 
 const COLS = 50;
 const ROWS = 30;
+const GAME_START_COUNTDOWN = 5;
 const DIRS = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+const oppositeDirs = {
+  ArrowUp: "ArrowDown",
+  ArrowDown: "ArrowUp",
+  ArrowLeft: "ArrowRight",
+  ArrowRight: "ArrowLeft",
+};
 const recordPannedContainer = document.getElementById("record-pannel");
 const speedValueContainer = document.querySelector(
   ".record-pannel__title .title__value--speed",
@@ -21,6 +28,12 @@ let infervalId = null;
 
 recordPannedContainer.style.width = `${COLS * 20}px`;
 speedValueContainer.innerText = SNAKE_START_SPEED - snakeMovementSpeed + 10;
+
+function timeDelay(time) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, time);
+  });
+}
 
 function isSnakeOutOfGrid() {
   let res = false;
@@ -208,7 +221,7 @@ function updateGameScore() {
   const scoreValueContainer = document.querySelector(
     ".record-pannel__title .title__value--score",
   );
-  scoreValueContainer.innerText = score;
+  scoreValueContainer.innerText = score * 10;
 }
 
 function updateSnakeSpeed() {
@@ -226,7 +239,11 @@ function updateSnakeSpeed() {
 
 function keyPressHandler(e) {
   const dir = e.key;
-  if (!DIRS.includes(dir) || dir === currentSnakeDirection) {
+  if (
+    !DIRS.includes(dir) ||
+    dir === currentSnakeDirection ||
+    oppositeDirs[currentSnakeDirection] === dir
+  ) {
     return;
   }
   currentSnakeDirection = dir;
@@ -236,6 +253,16 @@ function snakeAutoMoveHanlder() {
   moveSnake();
   checkIfBeatEaten();
   updateGrid();
+}
+
+async function gameStartCountdown() {
+  const gridOverlay = document.getElementById("grid-overlay");
+  for (let i = 0; i < GAME_START_COUNTDOWN; i++) {
+    gridOverlay.innerHTML = `<span class="grid-overlay__countdown">${
+      GAME_START_COUNTDOWN - i
+    }</span>`;
+    await timeDelay(1000);
+  }
 }
 
 function renderGrid() {
@@ -271,9 +298,13 @@ function renderGrid() {
     }
     gridContainer.appendChild(rowContainer);
   }
+  const gridOverlay = document.createElement("div");
+  gridOverlay.id = "grid-overlay";
+  gridContainer.appendChild(gridOverlay);
   gridContainer.style.width = `${COLS * 20}px`;
   gridContainer.style.height = `${ROWS * 20}px`;
-  document.body.appendChild(gridContainer);
+  document.body.prepend(gridContainer);
+  gridContainer.nextElementSibling.style.display = "flex";
 }
 
 function setSnakeMovementInterval() {
@@ -284,7 +315,15 @@ function setSnakeMovementInterval() {
   infervalId = setInterval(snakeAutoMoveHanlder, snakeMovementSpeed);
 }
 
-document.addEventListener("keydown", keyPressHandler);
-
 renderGrid(snakePos);
-setSnakeMovementInterval();
+
+gameStartCountdown();
+
+setTimeout(() => {
+  const gridOverlay = document.getElementById("grid-overlay");
+  if (gridOverlay) {
+    gridOverlay.remove();
+  }
+  document.addEventListener("keydown", keyPressHandler);
+  setSnakeMovementInterval();
+}, 5000);
