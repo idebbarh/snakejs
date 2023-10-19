@@ -10,20 +10,40 @@ function getFilePath(file) {
   return filePath;
 }
 
+function fileAsResponse(res, filePath) {
+  res.sendFile(filePath);
+}
+
 app.get("/", async (_, res) => {
-  res.sendFile(getFilePath("../index.html"));
+  fileAsResponse(res, getFilePath("../index.html"));
 });
 
 app.get("/index.js", async (_, res) => {
-  res.sendFile(getFilePath("../index.js"));
+  fileAsResponse(res, getFilePath("../index.js"));
 });
 
 app.get("/snake.js", async (_, res) => {
-  res.sendFile(getFilePath("../snake.js"));
+  fileAsResponse(res, getFilePath("../snake.js"));
+});
+
+app.get("/constants.js", async (_, res) => {
+  fileAsResponse(res, getFilePath("../constants.js"));
+});
+
+app.get("/utils.js", async (_, res) => {
+  fileAsResponse(res, getFilePath("../utils.js"));
+});
+
+app.get("/gameLogic.js", async (_, res) => {
+  fileAsResponse(res, getFilePath("../gameLogic.js"));
+});
+
+app.get("/domManipulation.js", async (_, res) => {
+  fileAsResponse(res, getFilePath("../domManipulation.js"));
 });
 
 app.get("/style.css", async (_, res) => {
-  res.sendFile(getFilePath("../style.css"));
+  fileAsResponse(res, getFilePath("../style.css"));
 });
 
 app.listen(PORT, () => {

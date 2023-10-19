@@ -1,0 +1,210 @@
+import {
+  COLS,
+  ROWS,
+  GAME_START_COUNTDOWN,
+  X_INC_SPEED,
+  SNAKE_MAX_SPEED,
+  SNAKE_START_SPEED,
+} from "./constants.js";
+
+import { timeDelay } from "./utils.js";
+
+import {
+  getBeatPosition,
+  isSnakeCell,
+  keyPressHandler,
+  moveSnake,
+} from "./gameLogic.js";
+import { gameSettings } from "./index.js";
+
+export function checkIfBeatEaten() {
+  const [beatCol, beatRow] = gameSettings.beatPos;
+  const [snakeCol, snakeRow] = gameSettings.snakeBody.tail.value;
+
+  if (beatCol !== snakeCol || beatRow !== snakeRow) {
+    return;
+  }
+  updateGameScore();
+  updateSnakeSpeed();
+  gameSettings.beatPos = getBeatPosition();
+  gameSettings.snakeBody.unshift();
+  setSnakeMovementInterval();
+}
+
+export function resetSnakeCell(cell) {
+  const newCellDot = document.createElement("span");
+  const currCellDot = cell.querySelector(".cell__dot");
+  //i think this will never be true
+  if (currCellDot) {
+    currCellDot.remove();
+  }
+  newCellDot.className = "cell__dot";
+  cell.classList.remove("row__cell--snake-body-cell");
+  cell.classList.remove("row__cell--snake-head-cell");
+  cell.appendChild(newCellDot);
+}
+
+export function changeCellToSnakeCell(cur, isHead = false) {
+  const [bodyCol, bodyRow] = cur.value;
+  const newBodyCell = document.querySelector(
+    `[cell-pos="${bodyCol},${bodyRow}"]`,
+  );
+  const newBodyCellDot = newBodyCell.querySelector(".cell__dot");
+
+  if (newBodyCellDot) {
+    newBodyCellDot.remove();
+  }
+
+  if (isHead) {
+    newBodyCell.classList.remove("row__cell--snake-body-cell");
+    newBodyCell.classList.add("row__cell--snake-head-cell");
+  } else {
+    newBodyCell.classList.remove("row__cell--snake-head-cell");
+    newBodyCell.classList.add("row__cell--snake-body-cell");
+  }
+}
+
+export function updateGridSnakeCells() {
+  let cur = gameSettings.snakeBody.head;
+
+  const curSnakeBodyCells = document.getElementsByClassName(
+    "row__cell--snake-body-cell",
+  );
+
+  const curSnakeHeadCell = document.querySelector(
+    ".row__cell--snake-head-cell",
+  );
+
+  Array.from(curSnakeBodyCells).forEach((cell) => {
+    resetSnakeCell(cell);
+  });
+
+  resetSnakeCell(curSnakeHeadCell);
+
+  while (cur.next) {
+    changeCellToSnakeCell(cur);
+    cur = cur.next;
+  }
+
+  changeCellToSnakeCell(cur, true);
+}
+
+export function updateGridBeatCell() {
+  const [beatCol, beatRow] = gameSettings.beatPos;
+  const curBeatCell = document.querySelector(".row__cell--beat-cell");
+  const newBeatCell = document.querySelector(
+    `[cell-pos="${beatCol},${beatRow}"]`,
+  );
+  curBeatCell.classList.remove("row__cell--beat-cell");
+  newBeatCell.classList.add("row__cell--beat-cell");
+}
+
+export function updateGrid() {
+  updateGridBeatCell();
+  updateGridSnakeCells();
+}
+
+export function updateGameScore() {
+  gameSettings.score++;
+  const scoreValueContainer = document.querySelector(
+    ".record-pannel__title .title__value--score",
+  );
+  scoreValueContainer.innerText = gameSettings.score * 10;
+}
+
+export function updateSnakeSpeed() {
+  const speedValueContainer = document.querySelector(
+    ".record-pannel__title .title__value--speed",
+  );
+  gameSettings.snakeMovementSpeed = Math.max(
+    SNAKE_MAX_SPEED,
+    gameSettings.snakeMovementSpeed - X_INC_SPEED,
+  );
+  if (gameSettings.snakeMovementSpeed === SNAKE_MAX_SPEED) {
+    speedValueContainer.classList.add("title__value--max");
+    speedValueContainer.innerText = "Max speed";
+    return;
+  }
+  speedValueContainer.innerText =
+    SNAKE_START_SPEED - gameSettings.snakeMovementSpeed + 10;
+}
+
+export function snakeAutoMoveHanlder() {
+  moveSnake();
+  checkIfBeatEaten();
+  updateGrid();
+}
+
+export async function gameStartCountdown() {
+  const gridOverlay = document.getElementById("grid-overlay");
+  for (let i = 0; i < GAME_START_COUNTDOWN; i++) {
+    gridOverlay.innerHTML = `<span class="grid-overlay__countdown">${
+      GAME_START_COUNTDOWN - i
+    }</span>`;
+    await timeDelay(1000);
+  }
+}
+
+export function renderGrid() {
+  const [beatCol, beatRow] = gameSettings.beatPos;
+
+  const gridContainer = document.createElement("div");
+  gridContainer.id = "grid";
+
+  for (let i = 0; i < ROWS; ++i) {
+    const rowContainer = document.createElement("div");
+    rowContainer.className = "grid__row";
+
+    for (let j = 0; j < COLS; ++j) {
+      const [, isSnakeHead] = isSnakeCell([j, i]);
+      const cell = document.createElement("div");
+
+      cell.className = "row__cell";
+      cell.setAttribute("cell-pos", `${j},${i}`);
+
+      if (i === beatRow && j == beatCol) {
+        cell.classList.add("row__cell--beat-cell");
+      } else if (isSnakeHead) {
+        cell.classList.add("row__cell--snake-head-cell");
+      }
+
+      if (!isSnakeHead) {
+        const cellDot = document.createElement("span");
+        cellDot.className = "cell__dot";
+        cell.appendChild(cellDot);
+      }
+
+      rowContainer.appendChild(cell);
+    }
+    gridContainer.appendChild(rowContainer);
+  }
+  const gridOverlay = document.createElement("div");
+  gridOverlay.id = "grid-overlay";
+  gridContainer.appendChild(gridOverlay);
+  gridContainer.style.width = `${COLS * 20}px`;
+  gridContainer.style.height = `${ROWS * 20}px`;
+  document.body.prepend(gridContainer);
+  gridContainer.nextElementSibling.style.display = "flex";
+  gridContainer.nextElementSibling.style.width = `${COLS * 20}px`;
+}
+
+export function setSnakeMovementInterval() {
+  if (gameSettings.intervalId !== null) {
+    clearInterval(gameSettings.intervalId);
+  }
+  snakeAutoMoveHanlder();
+  gameSettings.intervalId = setInterval(
+    snakeAutoMoveHanlder,
+    gameSettings.snakeMovementSpeed,
+  );
+}
+
+export async function startNewGame() {
+  const gridOverlay = document.getElementById("grid-overlay");
+  await timeDelay(GAME_START_COUNTDOWN * 1000);
+  if (gridOverlay) {
+    gridOverlay.remove();
+  }
+  document.addEventListener("keydown", keyPressHandler);
+  setSnakeMovementInterval();
+}
