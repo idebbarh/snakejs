@@ -18,6 +18,45 @@ body {
   align-items: center;
   flex-direction: column;
 }
+#start-game-menu {
+  border: 2px solid var(--snake-head-bg);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.start-game-menu__title {
+  font-size: 8rem;
+  text-transform: capitalize;
+  color: var(--snake-head-bg);
+}
+.start-game-menu__subtitle {
+  font-size: 2rem;
+  text-transform: uppercase;
+  color: var(--snake-head-bg);
+  padding: 2rem 0rem;
+}
+.start-game-menu__modes {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+.start-game-menu__modes > .modes__mode {
+  background: none;
+  border: none;
+  color: var(--snake-head-bg);
+  font-size: 3rem;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 0.8rem 1rem;
+  border-radius: 0.4rem;
+}
+
+.start-game-menu__modes > .modes__mode:hover {
+  background: var(--snake-head-bg);
+  color: var(--body-bg);
+}
 #grid {
   position: relative;
   display: flex;

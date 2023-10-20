@@ -1,9 +1,8 @@
-import { GAME_MODES } from "./constants.js";
 import {
-  startGameWithModeBtn,
   gameStartCountdown,
   renderGrid,
   renderRecordPannel,
+  renderStartGameMenu,
   startNewGame,
 } from "./domManipulation.js";
 
@@ -30,7 +29,5 @@ function gamePage() {
 }
 
 function homePage() {
-  GAME_MODES.forEach((l) => {
-    document.body.appendChild(startGameWithModeBtn(l));
-  });
+  renderStartGameMenu();
 }

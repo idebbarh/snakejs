@@ -5,6 +5,7 @@ import {
   X_INC_SPEED,
   SNAKE_MAX_SPEED,
   SNAKE_START_SPEED,
+  GAME_MODES,
 } from "./constants.js";
 
 import { timeDelay } from "./utils.js";
@@ -202,8 +203,9 @@ export function renderRecordPannel() {
   document.body.appendChild(recordPannedContainer);
 }
 
-export function startGameWithModeBtn(mode) {
+export function startGameWithModeBtn(mode, elemClassName) {
   const linkElem = document.createElement("button");
+  linkElem.className = elemClassName;
   linkElem.innerText = mode;
   linkElem.addEventListener("click", () => {
     gameSettings.gameMode = mode;
@@ -211,6 +213,25 @@ export function startGameWithModeBtn(mode) {
   });
 
   return linkElem;
+}
+
+export function renderStartGameMenu() {
+  const startGameMenuContainer = document.createElement("div");
+  startGameMenuContainer.id = "start-game-menu";
+  startGameMenuContainer.style.width = `${COLS * 20}px`;
+  startGameMenuContainer.style.height = `${ROWS * 20}px`;
+  startGameMenuContainer.innerHTML = `
+    <h1 class="start-game-menu__title">snake</h1>
+    <h3 class="start-game-menu__subtitle">choose game mode:</h1>
+    <div class="start-game-menu__modes"></div>
+`;
+
+  GAME_MODES.forEach((l) => {
+    startGameMenuContainer
+      .querySelector(".start-game-menu__modes")
+      .appendChild(startGameWithModeBtn(l, "modes__mode"));
+  });
+  document.body.appendChild(startGameMenuContainer);
 }
 
 export function setSnakeMovementInterval() {
