@@ -14,10 +14,6 @@ function fileAsResponse(res, filePath) {
   res.sendFile(filePath);
 }
 
-app.get("/", async (_, res) => {
-  fileAsResponse(res, getFilePath("../index.html"));
-});
-
 app.get("/index.js", async (_, res) => {
   fileAsResponse(res, getFilePath("../index.js"));
 });
@@ -41,11 +37,17 @@ app.get("/gameLogic.js", async (_, res) => {
 app.get("/domManipulation.js", async (_, res) => {
   fileAsResponse(res, getFilePath("../domManipulation.js"));
 });
+app.get("/pages.js", async (_, res) => {
+  fileAsResponse(res, getFilePath("../pages.js"));
+});
 
 app.get("/style.css", async (_, res) => {
   fileAsResponse(res, getFilePath("../style.css"));
 });
 
+app.get("/*", async (_, res) => {
+  fileAsResponse(res, getFilePath("../index.html"));
+});
 app.listen(PORT, () => {
   console.log("listen on " + PORT);
 });

@@ -1,10 +1,6 @@
 import { DIRS, SNAKE_START_POS, SNAKE_START_SPEED } from "./constants.js";
-import {
-  gameStartCountdown,
-  renderGrid,
-  startNewGame,
-} from "./domManipulation.js";
 import { getBeatPosition } from "./gameLogic.js";
+import { renderPages } from "./pages.js";
 import Snake from "./snake.js";
 
 export const gameSettings = {
@@ -14,10 +10,7 @@ export const gameSettings = {
   score: 0,
   intervalId: null,
   currentSnakeDirection: DIRS[Math.floor(Math.random() * DIRS.length)],
+  gameMode: null,
 };
 
-renderGrid();
-
-gameStartCountdown();
-
-startNewGame();
+renderPages("home");

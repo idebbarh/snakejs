@@ -16,6 +16,7 @@ import {
   moveSnake,
 } from "./gameLogic.js";
 import { gameSettings } from "./index.js";
+import { renderPages } from "./pages.js";
 
 export function checkIfBeatEaten() {
   const [beatCol, beatRow] = gameSettings.beatPos;
@@ -183,9 +184,33 @@ export function renderGrid() {
   gridContainer.appendChild(gridOverlay);
   gridContainer.style.width = `${COLS * 20}px`;
   gridContainer.style.height = `${ROWS * 20}px`;
-  document.body.prepend(gridContainer);
-  gridContainer.nextElementSibling.style.display = "flex";
-  gridContainer.nextElementSibling.style.width = `${COLS * 20}px`;
+  document.body.appendChild(gridContainer);
+}
+
+export function renderRecordPannel() {
+  const recordPannedContainer = document.createElement("div");
+  recordPannedContainer.id = "record-pannel";
+  recordPannedContainer.innerHTML = `
+      <h3 class="record-pannel__title">
+        speed:<span class="title__value title__value--speed">0</span>
+      </h3>
+      <h3 class="record-pannel__title">
+        score:<span class="title__value title__value--score">0</span>
+      </h3>
+`;
+  recordPannedContainer.style.width = `${COLS * 20}px`;
+  document.body.appendChild(recordPannedContainer);
+}
+
+export function startGameWithModeBtn(mode) {
+  const linkElem = document.createElement("button");
+  linkElem.innerText = mode;
+  linkElem.addEventListener("click", () => {
+    gameSettings.gameMode = mode;
+    renderPages("play");
+  });
+
+  return linkElem;
 }
 
 export function setSnakeMovementInterval() {
